@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Playlist</title>
+    <style>
+        :root { 
+            --bg: #f8f7ff; 
+            --card: #ffffff; 
+            --text: #2d1b4d; 
+            --primary: #7c3aed; 
+            --border: #e8e4f5; }
+        body { 
+            font-family: sans-serif;
+             background: var(--bg);
+              color: var(--text); 
+              display: flex; 
+              flex-direction: column; 
+              align-items: center; 
+              padding: 40px; }
+        h1 { background: linear-gradient(90deg, #4c1d95, #7c3aed);
+             -webkit-background-clip: text; 
+             background-clip: text; color: 
+             transparent; font-size: 3rem; }
+        .song-card { background: var(--card);
+             border: 1px solid var(--border); 
+             padding: 20px; 
+             border-radius: 15px;
+             width: 100%; max-width: 500px;
+             margin-bottom: 15px; 
+             display: flex;
+             justify-content: space-between;
+             align-items: center; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.1);
+             }
+        .back-btn { margin-bottom: 20px; color: var(--primary); text-decoration: none; font-weight: bold; }
+        .delete-btn { background: #fee2e2; color: #ef4444; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+    </style>
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">← Add More Songs</a>
+    <h1>Your Collection</h1>
+    <div id="display-area"></div>
+
+    <script>
+        async function loadSongs() {
+            const res = await fetch('/songs');
+            const songs = await res.json();
+            const area = document.getElementById('display-area');
+            area.innerHTML = songs.map(song => `
+                <div class="song-card">
+                    <div>
+                        <strong>${song.title}</strong><br>
+                        <small>${song.artist}</small>
+                    </div>
+                    <button class="delete-btn" onclick="deleteSong('${song._id}')">Delete</button>
+                </div>
+            `).join('');
+        }
+        loadSongs();
+        //delete the song from the database
+        async function deleteSong(id) {
+            await fetch(`/songs/${id}`, {
+                method: 'DELETE'
+            });
+            loadSongs();
+        }
+    </script>
+</body>
+</html>

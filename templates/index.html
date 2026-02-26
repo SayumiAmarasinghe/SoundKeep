@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Top Songs</title>
+    <style>
+        :root {
+            --bg: #f8f7ff;
+            --card: #ffffff;
+            --text: #2d1b4d;
+            --muted: #7c6f9a;
+            --border: #e8e4f5;
+            --primary: #7c3aed; /* Vibrant Violet */
+            --primary-hover: #6d28d9;
+            --shadow: 0 10px 30px rgba(124, 58, 237, 0.08);
+            --radius: 14px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+            background: radial-gradient(1200px 600px at 10% 0%, #f3eeff 0%, var(--bg) 55%, #fcfaff 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            margin-bottom: 24px;
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #4c1d95, #7c3aed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Input area styling */
+        input {
+            width: 100%;
+            max-width: 400px;
+            height: 44px;
+            margin-bottom: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            background: var(--card);
+            transition: all .2s ease;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+        }
+
+        #add-btn {
+            width: 100%;
+            max-width: 400px;
+            height: 48px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+            transition: all .2s ease;
+            margin-bottom: 30px;
+        }
+
+        #add-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Song list area */
+        #song-list {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .song-item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: transform 0.2s ease;
+        }
+
+        .song-item:hover {
+            transform: scale(1.02);
+            border-color: var(--primary);
+        }
+
+        .song-item span {
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .song-item button {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .song-item button:hover {
+            background: #fecaca;
+        }
+                .view-list-btn {
+            display: inline-block;
+            background: var(--primary); /* Uses your purple color */
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-weight: bold;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+        }
+
+        .view-list-btn:hover {
+            background: #6d28d9; /* Slightly darker purple */
+            transform: translateY(-2px);
+        }
+
+        .view-list-btn:active {
+            transform: translateY(0);
+        }
+
+    </style>
+</head>
+<body>
+    <h1>🎶 Favorite Songs 🎶</h1>
+    <input id="title" placeholder = "Song Title">
+    <input id = "artist" placeholder = "Artist Name">
+    <button id="add-btn">Add Song</button>
+    <div style="margin-top: 30px; text-align: center;">
+    <p>Already have a playlist?</p>
+    <a href="/list" class="view-list-btn">View My Collection →</a>
+    </div>
+
+    <div id="song-list"></div>
+    <script>
+        //display the songs on the page 
+        async function loadSongs() {
+            const response = await fetch('/songs');
+            const songs = await response.json();
+            const songList = document.getElementById('song-list');
+            songList.innerHTML = '';
+            songs.forEach(song => {
+                songList.innerHTML += `
+                < div class="song-item">
+                <span>${song.title} - ${song.artist}</span>
+                        <button onclick="deleteSong('${s._id}')">Delete</button>
+                    </div>`;
+            }); 
+        }
+        //add the song to the database
+        async function addSong() {
+            const title = document.getElementById('title').value;
+            const artist = document.getElementById('artist').value;
+
+            const response = await fetch('/songs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, artist })
+            });
+            const result = await response.json();
+
+            if (result.redirect) {
+                window.location.href = result.redirect;
+            }
+
+            //clear inputs after you add them
+            document.getElementById('title').value = '';
+            document.getElementById('artist').value = '';
+            loadSongs();
+            }
+        //delete the song from the database
+        async function deleteSong(id) {
+            await fetch(`/songs/${id}`, {
+                method: 'DELETE'
+            });
+            loadSongs();
+        }
+        document.getElementById('add-btn').addEventListener('click', addSong);
+        //load songs initially
+        loadSongs();
+        //add event listener to the add button
+
+    </script>
+</body>
+</html>
