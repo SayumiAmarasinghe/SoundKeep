@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # --- Configuration for SoundKeep ---
-# Updated to match the "sound-keep" folder shown in your VS Code
+# Updated tdo match the "sound-keep" folder shown in your VS Code
 APP_DIR="$HOME/sound-keep"
 APP_FILE="fav-songs.py"
 PY="$APP_DIR/.venv/bin/python"
